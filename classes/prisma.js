@@ -6,6 +6,7 @@ const Pair = require('../components/prisma/pair.js');
 const Mint = require('../components/prisma/mint.js');
 const Burn = require('../components/prisma/burn.js');
 const Swap = require('../components/prisma/swap.js');
+const Reserves = require('../components/prisma/reserves.js');
 
 class Prisma {
     constructor() {
@@ -18,6 +19,7 @@ class Prisma {
         this.mint = new Mint(this.prisma);
         this.burn = new Burn(this.prisma);
         this.swap = new Swap(this.prisma);
+        this.reserves = new Reserves(this.prisma);
     }
 
     async disconnect() {

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Interval = require('interval-promise')
 
-const PollInterval = 500;
+const PollInterval = 100;
 
 class Polling {
     constructor() {

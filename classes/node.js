@@ -17,6 +17,7 @@ class Node {
         this.handleMint = async (block, tx, mints) => {};
         this.handleBurn = async (block, tx, burns) => {};
         this.handleSwap = async (block, tx, swaps) => {};
+        this.handleReserves = async (block, pairs) => {};
 
         this.web3 = this.web3_.eth;
         this.abi = this.web3.abi;
@@ -31,35 +32,46 @@ class Node {
             }
         }
 
-        let lastBlock = this.polling.lastBlock();
-        let currentBlock = this.polling.currentBlock();
-        if (lastBlock == 0 || currentBlock == lastBlock) {
+        if (this.polling.lastBlock() == this.polling.currentBlock()) {
             this.polling.syncBlock(await this.web3.getBlockNumber());
         }
         
         this.polling.start(async () => {
-            let currentBlock = self.polling.currentBlock();
-            let block = await self.web3.getBlock(currentBlock);
-
+            let block = await self.web3.getBlock(self.polling.currentBlock());
+            
             await self.handleBlock(block);
 
-            let mint = Helpers.keccak256('Mint(address,uint256,uint256)');
-            let burn = Helpers.keccak256('Burn(address,uint256,uint256,address)');
-            let swap = Helpers.keccak256('Swap(address,uint256,uint256,uint256,uint256,address)');
+            let pairs = [];
             for (let txHash of block.transactions) {
                 let tx = await self.web3.getTransactionReceipt(txHash);
                 if (tx && tx.status == true && tx.logs.length > 0) {
-                    let mints = tx.logs.filter((x) => x.topics[0] == mint);
-                    let burns = tx.logs.filter((x) => x.topics[0] == burn);
-                    let swaps = tx.logs.filter((x) => x.topics[0] == swap);
+                    // Mint(address,uint256,uint256)
+                    let mints = tx.logs.filter((x) => x.topics[0] == '0xc209b5fc8ad50758f13e2e1088ba56a560dff690a1c6fef26394f4c03821c4f');
+                    // Burn(address,uint256,uint256,address)
+                    let burns = tx.logs.filter((x) => x.topics[0] == '0xdccd412f0b1252819cb1fd330b93224ca42612892bb3f4f789976e6d81936496');
+                    // Swap(address,uint256,uint256,uint256,uint256,address)
+                    let swaps = tx.logs.filter((x) => x.topics[0] == '0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822');
 
                     if (mints.length > 0 || burns.length > 0 || swaps.length > 0) {
                         await self.handleTransaction(block, tx);
+
                         if (mints.length > 0) await self.handleMint(block, tx, mints);
                         if (burns.length > 0) await self.handleBurn(block, tx, burns);
                         if (swaps.length > 0) await self.handleSwap(block, tx, swaps);
+
+                        for (let event of [mints, burns, swaps]) {
+                            for (let x of event) {
+                                if (!pairs.includes(x.address)) {
+                                    pairs.push(x.address);
+                                }
+                            }
+                        }
                     }
                 }
+            }
+
+            if (pairs.length > 0) {
+                await self.handleReserves(block, pairs);
             }
 
             self.polling.syncBlock(await self.web3.getBlockNumber());
@@ -102,6 +114,25 @@ class Node {
                     token1: token1
                 };
             }
+        } catch (err) {
+            // empty
+        }
+        return result;
+    }
+
+    async getReserves(hash, blockNumber) {
+        let result = null;
+        let pair = this.contract(IPair, hash);
+        try {
+            let reserves = await pair.methods.getReserves().call({
+                defaultBlock: blockNumber
+            });
+
+            result = {
+                reserve0: reserves[0],
+                reserve1: reserves[1],
+                timestamp: Helpers.toDate(reserves[2])
+            };
         } catch (err) {
             // empty
         }

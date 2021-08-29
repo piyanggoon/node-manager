@@ -106,13 +106,29 @@ async function handleSwap(block, tx, swaps) {
     }
 }
 
+async function handleReserves(block, pairs) {
+    for (let pair of pairs) {
+        let result = await node.getReserves(pair, block.number);
+        if (result !== null) {
+            await prisma.reserves.create({
+                hash: pair,
+                blockNumber: block.number,
+                reserve0: result.reserve0,
+                reserve1: result.reserve1,
+                timestamp: result.timestamp
+            });
+        }
+    }
+}
+
 async function main() {
     node.init({
         handleBlock,
         handleTransaction,
         handleMint,
         handleBurn,
-        handleSwap
+        handleSwap,
+        handleReserves
     });
 }
 
