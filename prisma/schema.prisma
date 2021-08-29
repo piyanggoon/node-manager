@@ -59,6 +59,7 @@ model Transaction {
   hash        String   @unique
   Block       Block    @relation(fields: [blockNumber], references: [number])
   blockNumber Int
+  index       Int
   timestamp   DateTime
   Mint        Mint[]
   Burn        Burn[]

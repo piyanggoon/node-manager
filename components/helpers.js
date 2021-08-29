@@ -25,3 +25,7 @@ exports.keccak256 = function(val) {
     if (typeof val !== 'string') throw 'keccak256: string';
     return Web3.utils.keccak256(val);
 };
+
+exports.toDate = function(timestamp) {
+    return new Date((timestamp * 1000));
+};

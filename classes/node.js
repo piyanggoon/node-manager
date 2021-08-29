@@ -4,6 +4,9 @@ const Config = require('../config.json');
 const Polling = require('./polling.js');
 const Helpers = require('../components/helpers.js');
 
+const IBep20 = require('../resources/abis/IBEP20.json');
+const IPair = require('../resources/abis/IPair.json');
+
 class Node {
     constructor() {
         this.web3_ = new Web3(new Web3.providers.IpcProvider(Config.geth.url, Net));
@@ -16,8 +19,16 @@ class Node {
         this.handleSwap = async (block, tx, swaps) => {};
     }
 
+    abi() {
+        return this.web3_.eth.abi;
+    }
+
     web3() {
         return this.web3_.eth;
+    }
+
+    contract(json, hash) {
+        return new this.web3_.eth.Contract(json, hash);
     }
 
     async init(params = {}) {
@@ -62,6 +73,44 @@ class Node {
 
             self.polling.syncBlock(await self.web3().getBlockNumber());
         });
+    }
+    
+    async getToken(hash) {
+        let result = null;
+        let token = this.contract(IBep20, hash);
+        try {
+            result = {
+                hash: hash,
+                name: await token.methods.name().call(),
+                symbol: await token.methods.symbol().call()
+            };
+        } catch (err) {
+            // empty
+        }
+        return result;
+    }
+
+    async getPair(hash) {
+        let result = null;
+        let pair = this.contract(IPair, hash);
+        try {
+            let token0 = await pair.methods.token0().call();
+                token0 = await this.getToken(token0);
+            let token1 = await pair.methods.token1().call();
+                token1 = await this.getToken(token1);
+
+            if (token0 !== null && token1 !== null) {
+                result = {
+                    hash: hash,
+                    factory: await pair.methods.factory().call(),
+                    token0: token0,
+                    token1: token1
+                };
+            }
+        } catch (err) {
+            // empty
+        }
+        return result;
     }
 }
 
