@@ -17,18 +17,9 @@ class Node {
         this.handleMint = async (block, tx, mints) => {};
         this.handleBurn = async (block, tx, burns) => {};
         this.handleSwap = async (block, tx, swaps) => {};
-    }
 
-    abi() {
-        return this.web3_.eth.abi;
-    }
-
-    web3() {
-        return this.web3_.eth;
-    }
-
-    contract(json, hash) {
-        return new this.web3_.eth.Contract(json, hash);
+        this.web3 = this.web3_.eth;
+        this.abi = this.web3.abi;
     }
 
     async init(params = {}) {
@@ -43,12 +34,12 @@ class Node {
         let lastBlock = this.polling.lastBlock();
         let currentBlock = this.polling.currentBlock();
         if (lastBlock == 0 || currentBlock == lastBlock) {
-            this.polling.syncBlock(await this.web3().getBlockNumber());
+            this.polling.syncBlock(await this.web3.getBlockNumber());
         }
         
         this.polling.start(async () => {
             let currentBlock = self.polling.currentBlock();
-            let block = await self.web3().getBlock(currentBlock);
+            let block = await self.web3.getBlock(currentBlock);
 
             await self.handleBlock(block);
 
@@ -56,7 +47,7 @@ class Node {
             let burn = Helpers.keccak256('Burn(address,uint256,uint256,address)');
             let swap = Helpers.keccak256('Swap(address,uint256,uint256,uint256,uint256,address)');
             for (let txHash of block.transactions) {
-                let tx = await self.web3().getTransactionReceipt(txHash);
+                let tx = await self.web3.getTransactionReceipt(txHash);
                 if (tx && tx.status == true && tx.logs.length > 0) {
                     let mints = tx.logs.filter((x) => x.topics[0] == mint);
                     let burns = tx.logs.filter((x) => x.topics[0] == burn);
@@ -71,8 +62,12 @@ class Node {
                 }
             }
 
-            self.polling.syncBlock(await self.web3().getBlockNumber());
+            self.polling.syncBlock(await self.web3.getBlockNumber());
         });
+    }
+
+    contract(json, hash) {
+        return new this.web3.Contract(json, hash);
     }
     
     async getToken(hash) {

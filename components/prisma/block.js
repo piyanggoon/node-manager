@@ -3,7 +3,7 @@ class Block {
         this.prisma = prisma;
     }
 
-    async getBlock(hash) {
+    async get(hash) {
         return await this.prisma.block.findFirst({
             where: {
                 hash: hash
@@ -11,7 +11,7 @@ class Block {
         });
     }
 
-    async createBlock(params) {
+    async create(params) {
         return await this.prisma.block.create({
             data: params
         });

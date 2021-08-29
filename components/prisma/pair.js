@@ -3,19 +3,31 @@ class Pair {
         this.prisma = prisma;
     }
 
-    async getPair(hash) {
+    async get(hash) {
         return await this.prisma.pair.findFirst({
             where: {
                 hash: hash
             },
             include: {
-                Token0: true,
-                Token1: true
+                Token0: {
+                    select: {
+                        hash: true,
+                        name: true,
+                        symbol: true
+                    }
+                },
+                Token1: {
+                    select: {
+                        hash: true,
+                        name: true,
+                        symbol: true
+                    }
+                }
             }
         });
     }
 
-    async createPair(params) {
+    async create(params) {
         return await this.prisma.pair.create({
             data: {
                 hash: params.hash,

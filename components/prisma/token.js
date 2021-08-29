@@ -3,7 +3,7 @@ class Token {
         this.prisma = prisma;
     }
 
-    async getToken(hash) {
+    async get(hash) {
         return await this.prisma.token.findFirst({
             where: {
                 hash: hash
@@ -11,7 +11,7 @@ class Token {
         });
     }
 
-    async createToken(params) {
+    async create(params) {
         return await this.prisma.token.create({
             data: {
                 hash: params.hash,

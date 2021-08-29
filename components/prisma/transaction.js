@@ -3,7 +3,7 @@ class Transaction {
         this.prisma = prisma;
     }
 
-    async getTransaction(hash) {
+    async get(hash) {
         return await this.prisma.transaction.findFirst({
             where: {
                 hash: hash
@@ -11,7 +11,7 @@ class Transaction {
         });
     }
     
-    async getTransactions(blockNumber) {
+    async gets(blockNumber) {
         return await this.prisma.transaction.findMany({
             where: {
                 Block: {
@@ -24,7 +24,7 @@ class Transaction {
         });
     }
 
-    async createTransaction(params) {
+    async create(params) {
         return await this.prisma.transaction.create({
             data: {
                 hash: params.hash,
