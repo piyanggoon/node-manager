@@ -38,7 +38,7 @@ class Node {
         
         this.polling.start(async () => {
             let block = await self.web3.getBlock(self.polling.currentBlock());
-            
+
             await self.handleBlock(block);
 
             let pairs = [];
@@ -46,7 +46,7 @@ class Node {
                 let tx = await self.web3.getTransactionReceipt(txHash);
                 if (tx && tx.status == true && tx.logs.length > 0) {
                     // Mint(address,uint256,uint256)
-                    let mints = tx.logs.filter((x) => x.topics[0] == '0xc209b5fc8ad50758f13e2e1088ba56a560dff690a1c6fef26394f4c03821c4f');
+                    let mints = tx.logs.filter((x) => x.topics[0] == '0x4c209b5fc8ad50758f13e2e1088ba56a560dff690a1c6fef26394f4c03821c4f');
                     // Burn(address,uint256,uint256,address)
                     let burns = tx.logs.filter((x) => x.topics[0] == '0xdccd412f0b1252819cb1fd330b93224ca42612892bb3f4f789976e6d81936496');
                     // Swap(address,uint256,uint256,uint256,uint256,address)
@@ -106,7 +106,7 @@ class Node {
             let token1 = await pair.methods.token1().call();
                 token1 = await this.getToken(token1);
 
-            if (token0 !== null && token1 !== null) {
+            if (token0 && token1) {
                 result = {
                     hash: hash,
                     factory: await pair.methods.factory().call(),

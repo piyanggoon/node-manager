@@ -9,7 +9,7 @@ const pairComp = new Pair(node, prisma);
 
 async function handleBlock(block) {
     let findBlock = await prisma.block.get(block.hash);
-    if (findBlock == null) {
+    if (!findBlock) {
         await prisma.block.create({
             hash: block.hash,
             number: block.number,
@@ -20,7 +20,7 @@ async function handleBlock(block) {
 
 async function handleTransaction(block, tx) {
     let findTransaction = await prisma.transaction.get(tx.transactionHash);
-    if (findTransaction == null) {
+    if (!findTransaction) {
         await prisma.transaction.create({
             hash: tx.transactionHash,
             index: tx.transactionIndex,
@@ -33,7 +33,7 @@ async function handleTransaction(block, tx) {
 async function handleMint(block, tx, mints) {
     for (let mint of mints) {
         let pair = await pairComp.get(mint.address);
-        if (pair !== null) {
+        if (pair) {
             let sender = node.abi.decodeParameter('address', mint.topics[1]);
             let params = node.abi.decodeParameters(['uint256', 'uint256'], mint.data);
             let token0 = (typeof pair.token0 === 'object' ? pair.token0 : pair.Token0);
@@ -55,7 +55,7 @@ async function handleMint(block, tx, mints) {
 async function handleBurn(block, tx, burns) {
     for (let burn of burns) {
         let pair = await pairComp.get(burn.address);
-        if (pair !== null) {
+        if (pair) {
             let sender = node.abi.decodeParameter('address', burn.topics[1]);
             let to = node.abi.decodeParameter('address', burn.topics[2]);
             let params = node.abi.decodeParameters(['uint256', 'uint256'], burn.data);
@@ -79,7 +79,7 @@ async function handleBurn(block, tx, burns) {
 async function handleSwap(block, tx, swaps) {
     for (let swap of swaps) {
         let pair = await pairComp.get(swap.address);
-        if (pair !== null) {
+        if (pair) {
             let sender = node.abi.decodeParameter('address', swap.topics[1]);
             let to = node.abi.decodeParameter('address', swap.topics[2]);
             let params = node.abi.decodeParameters(['uint256', 'uint256', 'uint256', 'uint256'], swap.data);
@@ -107,16 +107,19 @@ async function handleSwap(block, tx, swaps) {
 }
 
 async function handleReserves(block, pairs) {
-    for (let pair of pairs) {
-        let result = await node.getReserves(pair, block.number);
-        if (result !== null) {
-            await prisma.reserves.create({
-                hash: pair,
-                blockNumber: block.number,
-                reserve0: result.reserve0,
-                reserve1: result.reserve1,
-                timestamp: result.timestamp
-            });
+    for (let hash of pairs) {
+        let result = await node.getReserves(hash, block.number);
+        if (result) {
+            let findPair = await prisma.pair.get(hash);
+            if (findPair) {
+                await prisma.reserves.create({
+                    hash: hash,
+                    blockNumber: block.number,
+                    reserve0: result.reserve0,
+                    reserve1: result.reserve1,
+                    timestamp: result.timestamp
+                });
+            }
         }
     }
 }

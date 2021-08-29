@@ -6,11 +6,11 @@ class Pair {
 
     async get(hash) {
         let findPair = await this.prisma.pair.get(hash);
-        if (findPair == null) {
+        if (!findPair) {
             let pair = await this.node.getPair(hash);
-            if (pair !== null) {
+            if (pair) {
                 let token0 = await this.prisma.token.get(pair.token0.hash);
-                if (token0 == null) {
+                if (!token0) {
                     await this.prisma.token.create({
                         hash: pair.token0.hash,
                         name: pair.token0.name,
@@ -19,7 +19,7 @@ class Pair {
                 }
     
                 let token1 = await this.prisma.token.get(pair.token1.hash);
-                if (token1 == null) {
+                if (!token1) {
                     await this.prisma.token.create({
                         hash: pair.token1.hash,
                         name: pair.token1.name,
