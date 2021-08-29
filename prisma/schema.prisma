@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["mongoDb"]
+}
+
+model Block {
+  id          String        @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  hash        String        @unique
+  number      Int           @unique
+  timestamp   DateTime
+  Transaction Transaction[]
+  Reserves    Reserves[]
+}
+
+model Token {
+  id     String @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  hash   String @unique
+  name   String
+  symbol String
+}
+
+model Reserves {
+  id          String   @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  Block       Block    @relation(fields: [blockNumber], references: [number])
+  blockNumber Int
+  Pair        Pair     @relation(fields: [pairHash], references: [hash])
+  pairHash    String
+  reserve0    String
+  reserve1    String
+  timestamp   DateTime
+}
+
+model Pair {
+  id       String     @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  hash     String     @unique
+  factory  String
+  token0   String
+  token1   String
+  Reserves Reserves[]
+  Mint     Mint[]
+  Burn     Burn[]
+  Swap     Swap[]
+}
+
+model Transaction {
+  id          String   @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  hash        String   @unique
+  Block       Block    @relation(fields: [blockNumber], references: [number])
+  blockNumber Int
+  timestamp   DateTime
+  Mint        Mint[]
+  Burn        Burn[]
+  Swap        Swap[]
+}
+
+model Mint {
+  id              String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
+  transactionHash String
+  Pair            Pair        @relation(fields: [pairHash], references: [hash])
+  pairHash        String
+  sender          String
+  amount0         String
+  amount1         String
+}
+
+model Burn {
+  id              String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
+  transactionHash String
+  Pair            Pair        @relation(fields: [pairHash], references: [hash])
+  pairHash        String
+  sender          String
+  amount0         String
+  amount1         String
+  to              String
+}
+
+model Swap {
+  id              String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
+  transactionHash String
+  Pair            Pair        @relation(fields: [pairHash], references: [hash])
+  pairHash        String
+  sender          String
+  amount0In       String
+  amount1In       String
+  amount0Out      String
+  amount1Out      String
+  to              String
+}

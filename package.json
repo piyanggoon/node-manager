@@ -1,0 +1,21 @@
+{
+  "name": "node-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "piyanggoon",
+  "license": "ISC",
+  "devDependencies": {
+    "prisma": "^2.30.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^2.30.0",
+    "fs": "^0.0.1-security",
+    "interval-promise": "^1.4.0",
+    "net": "^1.0.2",
+    "web3": "^1.5.2"
+  }
+}

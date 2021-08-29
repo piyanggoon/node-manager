@@ -1,0 +1,5 @@
+{
+    "geth": {
+        "url": "../../bsc-node/node/geth.ipc"
+    }
+}
