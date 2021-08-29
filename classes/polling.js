@@ -51,7 +51,8 @@ class Polling {
     }
 
     sync() {
-        fs.writeFileSync('./polling.json', JSON.stringify(this.polling, null, 2));
+        let json = JSON.stringify(this.polling, null, 2);
+        fs.writeFileSync('./polling.json', json);
     }
 }
 

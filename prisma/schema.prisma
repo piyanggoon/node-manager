@@ -25,6 +25,8 @@ model Token {
   hash   String @unique
   name   String
   symbol String
+  Pair0  Pair[] @relation(name: "Pair0")
+  Pair1  Pair[] @relation(name: "Pair1")
 }
 
 model Reserves {
@@ -42,7 +44,9 @@ model Pair {
   id       String     @id @default(dbgenerated()) @map("_id") @db.ObjectId
   hash     String     @unique
   factory  String
+  Token0   Token      @relation(name: "Pair0", fields: [token0], references: [hash])
   token0   String
+  Token1   Token      @relation(name: "Pair1", fields: [token1], references: [hash])
   token1   String
   Reserves Reserves[]
   Mint     Mint[]
