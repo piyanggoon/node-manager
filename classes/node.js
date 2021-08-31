@@ -10,7 +10,7 @@ const IPair = require('../resources/abis/IPair.json');
 class Node {
     constructor() {
         this.web3_ = new Web3(new Web3.providers.IpcProvider(Config.geth.url, Net));
-        this.polling = new Polling();
+        this.polling = new Polling(100);
 
         this.handleBlock = async (block) => {};
         this.handleTransaction = async (block, tx) => {};
@@ -47,8 +47,10 @@ class Node {
                 if (tx && tx.status == true && tx.logs.length > 0) {
                     // Mint(address,uint256,uint256)
                     let mints = tx.logs.filter((x) => x.topics[0] == '0x4c209b5fc8ad50758f13e2e1088ba56a560dff690a1c6fef26394f4c03821c4f');
+                    
                     // Burn(address,uint256,uint256,address)
                     let burns = tx.logs.filter((x) => x.topics[0] == '0xdccd412f0b1252819cb1fd330b93224ca42612892bb3f4f789976e6d81936496');
+                    
                     // Swap(address,uint256,uint256,uint256,uint256,address)
                     let swaps = tx.logs.filter((x) => x.topics[0] == '0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822');
 

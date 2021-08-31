@@ -42,6 +42,7 @@ async function handleMint(block, tx, mints) {
             await prisma.mint.create({
                 txHash: tx.transactionHash,
                 pairHash: pair.hash,
+                index: mint.logIndex,
                 sender: sender,
                 amount0: params[0],
                 amount1: params[1]
@@ -65,6 +66,7 @@ async function handleBurn(block, tx, burns) {
             await prisma.burn.create({
                 txHash: tx.transactionHash,
                 pairHash: pair.hash,
+                index: burn.logIndex,
                 sender: sender,
                 amount0: params[0],
                 amount1: params[1],
@@ -89,6 +91,7 @@ async function handleSwap(block, tx, swaps) {
             await prisma.swap.create({
                 txHash: tx.transactionHash,
                 pairHash: pair.hash,
+                index: swap.logIndex,
                 sender: sender,
                 amount0In: params[0],
                 amount1In: params[1],
@@ -108,10 +111,10 @@ async function handleSwap(block, tx, swaps) {
 
 async function handleReserves(block, pairs) {
     for (let hash of pairs) {
-        let result = await node.getReserves(hash, block.number);
-        if (result) {
-            let findPair = await prisma.pair.get(hash);
-            if (findPair) {
+        let findPair = await prisma.pair.get(hash);
+        if (findPair) {
+            let result = await node.getReserves(hash, block.number);
+            if (result) {
                 await prisma.reserves.create({
                     hash: hash,
                     blockNumber: block.number,

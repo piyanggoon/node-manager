@@ -29,3 +29,10 @@ exports.keccak256 = function(val) {
 exports.toDate = function(timestamp) {
     return new Date((timestamp * 1000));
 };
+
+exports.arraySplit = function(arr, len) {
+    return arr.reduce(function(r, v, i) {
+        if ((i % len) == 0) r.push(arr.slice(i, (i + len)));
+        return r;
+    }, []);
+};

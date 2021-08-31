@@ -16,6 +16,7 @@ class Mint {
                         hash: params.pairHash
                     }
                 },
+                index: params.index,
                 sender: params.sender,
                 amount0: params.amount0,
                 amount1: params.amount1

@@ -16,6 +16,7 @@ class Swap {
                         hash: params.pairHash
                     }
                 },
+                index: params.index,
                 sender: params.sender,
                 amount0In: params.amount0In,
                 amount1In: params.amount1In,

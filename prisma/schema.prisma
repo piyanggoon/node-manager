@@ -2,17 +2,16 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["mongoDb"]
+  provider = "prisma-client-js"
 }
 
 model Block {
-  id          String        @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id          Int           @id @default(autoincrement())
   hash        String        @unique
   number      Int           @unique
   timestamp   DateTime
@@ -21,7 +20,7 @@ model Block {
 }
 
 model Token {
-  id     String @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id     Int    @id @default(autoincrement())
   hash   String @unique
   name   String
   symbol String
@@ -30,7 +29,7 @@ model Token {
 }
 
 model Reserves {
-  id          String   @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id          Int      @id @default(autoincrement())
   Block       Block    @relation(fields: [blockNumber], references: [number])
   blockNumber Int
   Pair        Pair     @relation(fields: [pairHash], references: [hash])
@@ -38,10 +37,12 @@ model Reserves {
   reserve0    String
   reserve1    String
   timestamp   DateTime
+
+  @@unique([blockNumber, pairHash])
 }
 
 model Pair {
-  id       String     @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id       Int        @id @default(autoincrement())
   hash     String     @unique
   factory  String
   Token0   Token      @relation(name: "Pair0", fields: [token0], references: [hash])
@@ -55,7 +56,7 @@ model Pair {
 }
 
 model Transaction {
-  id          String   @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id          Int      @id @default(autoincrement())
   hash        String   @unique
   Block       Block    @relation(fields: [blockNumber], references: [number])
   blockNumber Int
@@ -64,41 +65,52 @@ model Transaction {
   Mint        Mint[]
   Burn        Burn[]
   Swap        Swap[]
+
+  @@unique([hash, index])
 }
 
 model Mint {
-  id              String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id              Int         @id @default(autoincrement())
   Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
   transactionHash String
   Pair            Pair        @relation(fields: [pairHash], references: [hash])
   pairHash        String
+  index           Int
   sender          String
   amount0         String
   amount1         String
+
+  @@unique([transactionHash, index])
 }
 
 model Burn {
-  id              String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id              Int         @id @default(autoincrement())
   Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
   transactionHash String
   Pair            Pair        @relation(fields: [pairHash], references: [hash])
   pairHash        String
+  index           Int
   sender          String
   amount0         String
   amount1         String
   to              String
+
+  @@unique([transactionHash, index])
 }
 
 model Swap {
-  id              String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id              Int         @id @default(autoincrement())
   Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
   transactionHash String
   Pair            Pair        @relation(fields: [pairHash], references: [hash])
   pairHash        String
+  index           Int
   sender          String
   amount0In       String
   amount1In       String
   amount0Out      String
   amount1Out      String
   to              String
+
+  @@unique([transactionHash, index])
 }

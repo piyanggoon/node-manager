@@ -1,12 +1,11 @@
 const fs = require('fs');
 const Interval = require('interval-promise')
 
-const PollInterval = 100;
-
 class Polling {
-    constructor() {
+    constructor(interval = 1000) {
         let file = fs.readFileSync('./polling.json');
         this.polling = JSON.parse(file);
+        this.interval = interval;
         this.stop = false;
     }
 
@@ -23,10 +22,9 @@ class Polling {
                     self.nextBlock();
                 }
             } catch(err) {
-                // empty
                 console.log(err)
             }
-        }, PollInterval);
+        }, self.interval);
     }
 
     stop() {
