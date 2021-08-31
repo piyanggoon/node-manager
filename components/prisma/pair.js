@@ -4,25 +4,13 @@ class Pair {
     }
 
     async get(hash) {
-        return await this.prisma.pair.findFirst({
+        return await this.prisma.pair.findUnique({
             where: {
                 hash: hash
             },
             include: {
-                Token0: {
-                    select: {
-                        hash: true,
-                        name: true,
-                        symbol: true
-                    }
-                },
-                Token1: {
-                    select: {
-                        hash: true,
-                        name: true,
-                        symbol: true
-                    }
-                }
+                Token0: true,
+                Token1: true
             }
         });
     }

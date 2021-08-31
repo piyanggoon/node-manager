@@ -4,7 +4,7 @@ class Token {
     }
 
     async get(hash) {
-        return await this.prisma.token.findFirst({
+        return await this.prisma.token.findUnique({
             where: {
                 hash: hash
             }

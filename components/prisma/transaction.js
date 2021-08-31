@@ -3,23 +3,13 @@ class Transaction {
         this.prisma = prisma;
     }
 
-    async get(hash) {
-        return await this.prisma.transaction.findFirst({
+    async unique(hash, index) {
+        return await this.prisma.transaction.findUnique({
             where: {
-                hash: hash
-            }
-        });
-    }
-    
-    async gets(blockNumber) {
-        return await this.prisma.transaction.findMany({
-            where: {
-                Block: {
-                    number: blockNumber 
+                hash_index: {
+                    hash: hash,
+                    index: index
                 }
-            },
-            orderBy: {
-                index: 'asc'
             }
         });
     }

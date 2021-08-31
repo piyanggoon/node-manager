@@ -3,6 +3,17 @@ class Swap {
         this.prisma = prisma;
     }
 
+    async unique(txHash, index) {
+        return await this.prisma.swap.findUnique({
+            where: {
+                transactionHash_index: {
+                    transactionHash: txHash,
+                    index: index
+                }
+            }
+        });
+    }
+
     async create(params) {
         return await this.prisma.swap.create({
             data: {

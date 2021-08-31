@@ -41,7 +41,7 @@ class Node {
 
             await self.handleBlock(block);
 
-            let pairs = [];
+            /*let pairs = [];
             for (let txHash of block.transactions) {
                 let tx = await self.web3.getTransactionReceipt(txHash);
                 if (tx && tx.status == true && tx.logs.length > 0) {
@@ -70,6 +70,49 @@ class Node {
                         }
                     }
                 }
+            }*/
+
+            let pairs = [];
+            if (block.transactions.length > 0) {
+                let func = async (txHashs) => {
+                    for (let txHash of txHashs) {
+                        let tx = await self.web3.getTransactionReceipt(txHash);
+                        if (tx && tx.status == true && tx.logs.length > 0) {
+                            // Mint(address,uint256,uint256)
+                            let mints = tx.logs.filter((x) => x.topics[0] == '0x4c209b5fc8ad50758f13e2e1088ba56a560dff690a1c6fef26394f4c03821c4f');
+                            
+                            // Burn(address,uint256,uint256,address)
+                            let burns = tx.logs.filter((x) => x.topics[0] == '0xdccd412f0b1252819cb1fd330b93224ca42612892bb3f4f789976e6d81936496');
+                            
+                            // Swap(address,uint256,uint256,uint256,uint256,address)
+                            let swaps = tx.logs.filter((x) => x.topics[0] == '0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822');
+        
+                            if (mints.length > 0 || burns.length > 0 || swaps.length > 0) {
+                                await self.handleTransaction(block, tx);
+        
+                                if (mints.length > 0) await self.handleMint(block, tx, mints);
+                                if (burns.length > 0) await self.handleBurn(block, tx, burns);
+                                if (swaps.length > 0) await self.handleSwap(block, tx, swaps);
+        
+                                for (let event of [mints, burns, swaps]) {
+                                    for (let x of event) {
+                                        if (!pairs.includes(x.address)) {
+                                            pairs.push(x.address);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                let promises = [];
+                let length = (Math.ceil(block.transactions.length / 8));
+                let splitTx = Helpers.arraySplit(block.transactions, length);
+                for (let txHashs of splitTx) {
+                    promises.push(func(txHashs));
+                }
+                await Promise.all(promises);
             }
 
             if (pairs.length > 0) {

@@ -3,6 +3,17 @@ class Reserves {
         this.prisma = prisma;
     }
 
+    async unique(blockNumber, hash) {
+        return await this.prisma.reserves.findUnique({
+            where: {
+                blockNumber_pairHash: {
+                    blockNumber: blockNumber,
+                    pairHash: hash
+                }
+            }
+        });
+    }
+
     async create(params) {
         return await this.prisma.reserves.create({
             data: {

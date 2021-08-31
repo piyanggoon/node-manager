@@ -31,6 +31,11 @@ class Polling {
         this.stop = true;
     }
 
+    sync() {
+        let json = JSON.stringify(this.polling, null, 2);
+        fs.writeFileSync('./polling.json', json);
+    }
+
     lastBlock() {
         return this.polling.lastBlock;
     }
@@ -47,11 +52,6 @@ class Polling {
     nextBlock() {
         this.polling.syncBlock++;
         this.sync();
-    }
-
-    sync() {
-        let json = JSON.stringify(this.polling, null, 2);
-        fs.writeFileSync('./polling.json', json);
     }
 }
 

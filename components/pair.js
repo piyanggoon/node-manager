@@ -5,8 +5,8 @@ class Pair {
     }
 
     async get(hash) {
-        let findPair = await this.prisma.pair.get(hash);
-        if (!findPair) {
+        let find = await this.prisma.pair.get(hash);
+        if (!find) {
             let pair = await this.node.getPair(hash);
             if (pair) {
                 let token0 = await this.prisma.token.get(pair.token0.hash);
@@ -41,7 +41,7 @@ class Pair {
                 return pair;
             }
         }
-        return findPair;
+        return find;
     }
 }
 

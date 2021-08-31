@@ -4,7 +4,7 @@ class Block {
     }
 
     async get(hash) {
-        return await this.prisma.block.findFirst({
+        return await this.prisma.block.findUnique({
             where: {
                 hash: hash
             }

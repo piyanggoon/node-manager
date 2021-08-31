@@ -3,6 +3,17 @@ class Burn {
         this.prisma = prisma;
     }
 
+    async unique(txHash, index) {
+        return await this.prisma.burn.findUnique({
+            where: {
+                transactionHash_index: {
+                    transactionHash: txHash,
+                    index: index
+                }
+            }
+        });
+    }
+
     async create(params) {
         return await this.prisma.burn.create({
             data: {
