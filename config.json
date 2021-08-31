@@ -1,5 +1,8 @@
 {
     "geth": {
         "url": "../../bsc-node/node/geth.ipc"
+    },
+    "polling": {
+        "interval": 100
     }
 }
