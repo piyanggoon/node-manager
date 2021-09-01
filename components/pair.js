@@ -25,8 +25,8 @@ class Pair {
                         return result;
                     };
                     
-                    let token0 = await this.queue.add(func, [self, pair.token0], pair.token0.hash);
-                    let token1 = await this.queue.add(func, [self, pair.token1], pair.token1.hash);
+                    await self.queue.add(func, [self, pair.token0], pair.token0.hash);
+                    await self.queue.add(func, [self, pair.token1], pair.token1.hash);
         
                     await self.prisma.pair.create({
                         hash: hash,

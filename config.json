@@ -4,6 +4,6 @@
     },
     "polling": {
         "interval": 1,
-        "step": 50
+        "step": 100
     }
 }
