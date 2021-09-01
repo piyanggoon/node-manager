@@ -36,8 +36,8 @@ class Node {
             this.polling.syncBlock(await this.web3.getBlockNumber());
         }
         
-        this.polling.start(async () => {
-            let block = await self.web3.getBlock(self.polling.currentBlock());
+        this.polling.start(async (blockNumber) => {
+            let block = await self.web3.getBlock(blockNumber);
 
             await self.handleBlock(block);
             
@@ -46,7 +46,7 @@ class Node {
                 let func = async (txHashs) => {
                     for (let txHash of txHashs) {
                         let tx = await self.web3.getTransactionReceipt(txHash);
-                        if (tx && tx.status == true && tx.logs.length > 0) {
+                        if (tx && tx.status && tx.logs.length > 0) {
                             // Mint(address,uint256,uint256)
                             let mints = tx.logs.filter((x) => x.topics[0] == '0x4c209b5fc8ad50758f13e2e1088ba56a560dff690a1c6fef26394f4c03821c4f');
                             
@@ -87,9 +87,7 @@ class Node {
             if (pairs.length > 0) {
                 await self.handleReserves(block, pairs);
             }
-
-            self.polling.syncBlock(await self.web3.getBlockNumber());
-        });
+        }, Config.polling.step);
     }
 
     contract(json, hash) {

@@ -9,7 +9,7 @@ class Polling {
         this.stop = false;
     }
 
-    start(func) {
+    start(func, step = 1) {
         let self = this;
         Interval(async (iteration, stop) => {
             if (self.stop) {
@@ -17,9 +17,15 @@ class Polling {
             }
             
             try {
-                if (self.polling.syncBlock < self.polling.lastBlock) {
-                    await func();
-                    self.nextBlock();
+                let promises = [];
+                let blockLeft = (self.polling.lastBlock - self.polling.syncBlock);
+                    blockLeft = (blockLeft > step ? step : blockLeft);
+                if (blockLeft >= 1) {
+                    for (let i = 0; i < blockLeft; i++) {
+                        promises.push(func(self.polling.syncBlock++));
+                    }
+                    await Promise.all(promises);
+                    self.sync();
                 }
             } catch(err) {
                 console.log(err)
@@ -36,22 +42,17 @@ class Polling {
         fs.writeFileSync('./polling.json', json);
     }
 
+    syncBlock(number) {
+        this.polling.lastBlock = number;
+        this.sync();
+    }
+
     lastBlock() {
         return this.polling.lastBlock;
     }
 
     currentBlock() {
         return this.polling.syncBlock;
-    }
-
-    syncBlock(number) {
-        this.polling.lastBlock = number;
-        this.sync();
-    }
-
-    nextBlock() {
-        this.polling.syncBlock++;
-        this.sync();
     }
 }
 

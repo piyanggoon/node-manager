@@ -3,6 +3,7 @@
         "url": "../../bsc-node/node/geth.ipc"
     },
     "polling": {
-        "interval": 100
+        "interval": 1,
+        "step": 50
     }
 }
