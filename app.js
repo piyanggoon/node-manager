@@ -38,8 +38,8 @@ async function handleMint(block, tx, mints) {
             if (pair) {
                 let sender = node.abi.decodeParameter('address', mint.topics[1]);
                 let params = node.abi.decodeParameters(['uint256', 'uint256'], mint.data);
-                let token0 = (typeof pair.token0 === 'object' ? pair.token0 : pair.Token0);
-                let token1 = (typeof pair.token1 === 'object' ? pair.token1 : pair.Token1);
+                //let token0 = (typeof pair.token0 === 'object' ? pair.token0 : pair.Token0);
+                //let token1 = (typeof pair.token1 === 'object' ? pair.token1 : pair.Token1);
 
                 await prisma.mint.create({
                     txHash: tx.transactionHash,
@@ -50,7 +50,7 @@ async function handleMint(block, tx, mints) {
                     amount1: params[1]
                 });
 
-                console.log(`[${token0.symbol}/${token1.symbol}] Mint ${Helper.toEther(params[0])} ${token0.symbol} And ${Helper.toEther(params[1])} ${token1.symbol}`)
+                //console.log(`[${token0.symbol}/${token1.symbol}] Mint ${Helper.toEther(params[0])} ${token0.symbol} And ${Helper.toEther(params[1])} ${token1.symbol}`)
             }
         }
     }
@@ -65,8 +65,8 @@ async function handleBurn(block, tx, burns) {
                 let sender = node.abi.decodeParameter('address', burn.topics[1]);
                 let to = node.abi.decodeParameter('address', burn.topics[2]);
                 let params = node.abi.decodeParameters(['uint256', 'uint256'], burn.data);
-                let token0 = (typeof pair.token0 === 'object' ? pair.token0 : pair.Token0);
-                let token1 = (typeof pair.token1 === 'object' ? pair.token1 : pair.Token1);
+                //let token0 = (typeof pair.token0 === 'object' ? pair.token0 : pair.Token0);
+                //let token1 = (typeof pair.token1 === 'object' ? pair.token1 : pair.Token1);
 
                 await prisma.burn.create({
                     txHash: tx.transactionHash,
@@ -78,7 +78,27 @@ async function handleBurn(block, tx, burns) {
                     to: to
                 });
 
-                console.log(`[${token0.symbol}/${token1.symbol}] Burn ${Helper.toEther(params[0])} ${token0.symbol} And ${Helper.toEther(params[1])} ${token1.symbol}`)
+                //console.log(`[${token0.symbol}/${token1.symbol}] Burn ${Helper.toEther(params[0])} ${token0.symbol} And ${Helper.toEther(params[1])} ${token1.symbol}`)
+            }
+        }
+    }
+}
+
+async function handleSync(block, tx, syncs) {
+    for (let sync of syncs) {
+        let unique = await prisma.sync.unique(tx.transactionHash, sync.logIndex);
+        if(!unique) {
+            let pair = await pairComp.get(sync.address);
+            if (pair) {
+                let params = node.abi.decodeParameters(['uint112', 'uint112'], sync.data);
+
+                await prisma.sync.create({
+                    txHash: tx.transactionHash,
+                    pairHash: pair.hash,
+                    index: sync.logIndex,
+                    reserve0: params[0],
+                    reserve1: params[1]
+                });
             }
         }
     }
@@ -93,8 +113,8 @@ async function handleSwap(block, tx, swaps) {
                 let sender = node.abi.decodeParameter('address', swap.topics[1]);
                 let to = node.abi.decodeParameter('address', swap.topics[2]);
                 let params = node.abi.decodeParameters(['uint256', 'uint256', 'uint256', 'uint256'], swap.data);
-                let token0 = (typeof pair.token0 === 'object' ? pair.token0 : pair.Token0);
-                let token1 = (typeof pair.token1 === 'object' ? pair.token1 : pair.Token1);
+                //let token0 = (typeof pair.token0 === 'object' ? pair.token0 : pair.Token0);
+                //let token1 = (typeof pair.token1 === 'object' ? pair.token1 : pair.Token1);
 
                 await prisma.swap.create({
                     txHash: tx.transactionHash,
@@ -108,11 +128,11 @@ async function handleSwap(block, tx, swaps) {
                     to: to
                 });
 
-                if (Helper.toEther(params[0]) > 0) {
+                /*if (Helper.toEther(params[0]) > 0) {
                     console.log(`[${token0.symbol}/${token1.symbol}] Swap ${Helper.toEther(params[0])} ${token0.symbol} to ${Helper.toEther(params[3])} ${token1.symbol}`)
                 } else if (Helper.toEther(params[1]) > 0) {
                     console.log(`[${token0.symbol}/${token1.symbol}] Swap ${Helper.toEther(params[1])} ${token1.symbol} to ${Helper.toEther(params[2])} ${token0.symbol}`)
-                }
+                }*/
             }
         }
     }
@@ -145,6 +165,7 @@ async function main() {
         handleTransaction,
         handleMint,
         handleBurn,
+        handleSync,
         handleSwap,
         handleReserves
     });

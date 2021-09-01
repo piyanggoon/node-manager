@@ -5,6 +5,7 @@ const Token = require('../components/prisma/token.js');
 const Pair = require('../components/prisma/pair.js');
 const Mint = require('../components/prisma/mint.js');
 const Burn = require('../components/prisma/burn.js');
+const Sync = require('../components/prisma/sync.js');
 const Swap = require('../components/prisma/swap.js');
 const Reserves = require('../components/prisma/reserves.js');
 
@@ -18,6 +19,7 @@ class Prisma {
         this.pair = new Pair(this.prisma);
         this.mint = new Mint(this.prisma);
         this.burn = new Burn(this.prisma);
+        this.sync = new Sync(this.prisma);
         this.swap = new Swap(this.prisma);
         this.reserves = new Reserves(this.prisma);
     }

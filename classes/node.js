@@ -17,6 +17,7 @@ class Node {
         this.handleMint = async (block, tx, mints) => {};
         this.handleBurn = async (block, tx, burns) => {};
         this.handleSwap = async (block, tx, swaps) => {};
+        this.handleSync = async (block, tx, syncs) => {};
         this.handleReserves = async (block, pairs) => {};
 
         this.web3 = this.web3_.eth;
@@ -53,17 +54,21 @@ class Node {
                             // Burn(address,uint256,uint256,address)
                             let burns = tx.logs.filter((x) => x.topics[0] == '0xdccd412f0b1252819cb1fd330b93224ca42612892bb3f4f789976e6d81936496');
                             
+                            // Sync(uint112,uint112)
+                            let syncs = tx.logs.filter((x) => x.topics[0] == '0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1');
+
                             // Swap(address,uint256,uint256,uint256,uint256,address)
                             let swaps = tx.logs.filter((x) => x.topics[0] == '0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822');
         
-                            if (mints.length > 0 || burns.length > 0 || swaps.length > 0) {
+                            if (mints.length > 0 || burns.length > 0 || syncs.length > 0 || swaps.length > 0) {
                                 await self.handleTransaction(block, tx);
         
                                 if (mints.length > 0) await self.handleMint(block, tx, mints);
                                 if (burns.length > 0) await self.handleBurn(block, tx, burns);
+                                if (syncs.length > 0) await self.handleSync(block, tx, syncs);
                                 if (swaps.length > 0) await self.handleSwap(block, tx, swaps);
         
-                                for (let event of [mints, burns, swaps]) {
+                                for (let event of [mints, burns, syncs, swaps]) {
                                     for (let x of event) {
                                         if (!pairs.includes(x.address)) {
                                             pairs.push(x.address);
@@ -109,6 +114,20 @@ class Node {
         return result;
     }
 
+    async getFactory(pair) {
+        let result = '-';
+        try {
+            result = await pair.methods.factory().call();
+        } catch (err) {
+            try {
+                result = await pair.methods.FACTORY().call();
+            } catch (err) {
+                // empty
+            }
+        }
+        return result;
+    }
+
     async getPair(hash) {
         let result = null;
         let pair = this.contract(IPair, hash);
@@ -121,7 +140,7 @@ class Node {
             if (token0 && token1) {
                 result = {
                     hash: hash,
-                    factory: await pair.methods.factory().call(),
+                    factory: await this.getFactory(pair),
                     token0: token0,
                     token1: token1
                 };

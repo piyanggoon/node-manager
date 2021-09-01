@@ -9,10 +9,10 @@
   "author": "piyanggoon",
   "license": "ISC",
   "devDependencies": {
-    "prisma": "^2.30.0"
+    "prisma": "^2.30.2"
   },
   "dependencies": {
-    "@prisma/client": "^2.30.0",
+    "@prisma/client": "^2.30.2",
     "fs": "^0.0.1-security",
     "interval-promise": "^1.4.0",
     "net": "^1.0.2",

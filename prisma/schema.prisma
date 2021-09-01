@@ -52,6 +52,7 @@ model Pair {
   Reserves Reserves[]
   Mint     Mint[]
   Burn     Burn[]
+  Sync     Sync[]
   Swap     Swap[]
 }
 
@@ -64,6 +65,7 @@ model Transaction {
   timestamp   DateTime
   Mint        Mint[]
   Burn        Burn[]
+  Sync        Sync[]
   Swap        Swap[]
 
   @@unique([hash, index])
@@ -94,6 +96,19 @@ model Burn {
   amount0         String
   amount1         String
   to              String
+
+  @@unique([transactionHash, index])
+}
+
+model Sync {
+  id              Int         @id @default(autoincrement())
+  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
+  transactionHash String
+  Pair            Pair        @relation(fields: [pairHash], references: [hash])
+  pairHash        String
+  index           Int
+  reserve0        String
+  reserve1        String
 
   @@unique([transactionHash, index])
 }
