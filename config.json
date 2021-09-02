@@ -4,6 +4,9 @@
     },
     "polling": {
         "interval": 1,
-        "step": 150
+        "step": 100
+    },
+    "memory": {
+        "limit": 8192
     }
 }

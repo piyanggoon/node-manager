@@ -19,6 +19,7 @@ class Node {
         this.handleSwap = async (block, tx, swaps) => {};
         this.handleSync = async (block, tx, syncs) => {};
         this.handleReserves = async (block, pairs) => {};
+        this.outOfMemory = async () => {};
 
         this.web3 = this.web3_.eth;
         this.abi = this.web3.abi;
@@ -33,11 +34,11 @@ class Node {
             }
         }
 
-        if (this.polling.lastBlock() == this.polling.currentBlock()) {
-            this.polling.syncBlock(await this.web3.getBlockNumber());
+        if (self.polling.lastBlock() == self.polling.currentBlock()) {
+            self.polling.syncBlock(await self.web3.getBlockNumber());
         }
         
-        this.polling.start(async (blockNumber) => {
+        self.polling.start(async (blockNumber) => {
             let block = await self.web3.getBlock(blockNumber);
 
             await self.handleBlock(block);
@@ -92,7 +93,7 @@ class Node {
             if (pairs.length > 0) {
                 await self.handleReserves(block, pairs);
             }
-        }, Config.polling.step);
+        }, Config.polling.step, self.outOfMemory);
     }
 
     contract(json, hash) {

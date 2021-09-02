@@ -159,6 +159,13 @@ async function handleReserves(block, pairs) {
     }
 }
 
+async function outOfMemory() {
+    await prisma.disconnect();
+    setTimeout(() => {
+        throw 'Out Of Memory'
+    }, 1000);
+}
+
 async function main() {
     node.init({
         handleBlock,
@@ -167,12 +174,11 @@ async function main() {
         handleBurn,
         handleSync,
         handleSwap,
-        handleReserves
+        handleReserves,
+        outOfMemory
     });
 }
 
 main().catch((err) => {
     throw err;
-}).finally(async () => {
-    prisma.disconnect();
 });

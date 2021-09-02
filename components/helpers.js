@@ -18,6 +18,14 @@ exports.arraySplit = function(arr, len) {
     }, []);
 };
 
+exports.memoryUsage = function(limit) {
+    let memory = process.memoryUsage();
+    if ((memory.heapUsed / 1024 / 1024) >= limit) {
+        return true;
+    }
+    return false;
+}
+
 exports.toDate = function(timestamp) {
     return new Date((timestamp * 1000));
 };
