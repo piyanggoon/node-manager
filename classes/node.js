@@ -1,8 +1,8 @@
 const Net = require('net');
 const Web3 = require('web3');
-const Config = require('../config.json');
 const Polling = require('./polling.js');
 const Helpers = require('../components/helpers.js');
+const Config = require('../config.json');
 
 const IBep20 = require('../resources/abis/IBEP20.json');
 const IPair = require('../resources/abis/IPair.json');
@@ -11,6 +11,8 @@ class Node {
     constructor() {
         this.web3_ = new Web3(new Web3.providers.IpcProvider(Config.geth.url, Net));
         this.polling = new Polling(Config.polling.interval);
+        this.web3 = this.web3_.eth;
+        this.abi = this.web3.abi;
 
         this.handleBlock = async (block) => {};
         this.handleTransaction = async (block, tx) => {};
@@ -20,9 +22,6 @@ class Node {
         this.handleSync = async (block, tx, syncs) => {};
         this.handleReserves = async (block, pairs) => {};
         this.outOfMemory = async () => {};
-
-        this.web3 = this.web3_.eth;
-        this.abi = this.web3.abi;
     }
 
     async init(params = {}) {
@@ -49,16 +48,9 @@ class Node {
                     for (let txHash of txHashs) {
                         let tx = await self.web3.getTransactionReceipt(txHash);
                         if (tx && tx.status && tx.logs.length > 0) {
-                            // Mint(address,uint256,uint256)
                             let mints = tx.logs.filter((x) => x.topics[0] == '0x4c209b5fc8ad50758f13e2e1088ba56a560dff690a1c6fef26394f4c03821c4f');
-                            
-                            // Burn(address,uint256,uint256,address)
                             let burns = tx.logs.filter((x) => x.topics[0] == '0xdccd412f0b1252819cb1fd330b93224ca42612892bb3f4f789976e6d81936496');
-                            
-                            // Sync(uint112,uint112)
                             let syncs = tx.logs.filter((x) => x.topics[0] == '0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1');
-
-                            // Swap(address,uint256,uint256,uint256,uint256,address)
                             let swaps = tx.logs.filter((x) => x.topics[0] == '0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822');
         
                             if (mints.length > 0 || burns.length > 0 || syncs.length > 0 || swaps.length > 0) {
@@ -82,7 +74,7 @@ class Node {
                 };
 
                 let promises = [];
-                let length = (Math.ceil(block.transactions.length / 8));
+                let length = Math.ceil(block.transactions.length / 8);
                 let splitTx = Helpers.arraySplit(block.transactions, length);
                 for (let txHashs of splitTx) {
                     promises.push(func(txHashs));

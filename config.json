@@ -3,8 +3,8 @@
         "url": "../../bsc-node/node/geth.ipc"
     },
     "polling": {
-        "interval": 1,
-        "step": 100
+        "interval": 1000,
+        "step": 10000
     },
     "memory": {
         "limit": 8192

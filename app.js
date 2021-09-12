@@ -1,11 +1,11 @@
 const Node = require('./classes/node.js');
 const Prisma = require('./classes/prisma.js');
+const Component = require('./components/index.js');
 const Helper = require('./components/helpers.js');
-const Pair = require('./components/pair.js');
 
 const node = new Node();
 const prisma = new Prisma();
-const pairComp = new Pair(node, prisma);
+const component = new Component(node, prisma);
 
 async function handleBlock(block) {
     let find = await prisma.block.get(block.hash);
@@ -34,12 +34,10 @@ async function handleMint(block, tx, mints) {
     for (let mint of mints) {
         let unique = await prisma.mint.unique(tx.transactionHash, mint.logIndex);
         if(!unique) {
-            let pair = await pairComp.get(mint.address);
+            let pair = await component.pair.get(mint.address);
             if (pair) {
                 let sender = node.abi.decodeParameter('address', mint.topics[1]);
                 let params = node.abi.decodeParameters(['uint256', 'uint256'], mint.data);
-                //let token0 = (typeof pair.token0 === 'object' ? pair.token0 : pair.Token0);
-                //let token1 = (typeof pair.token1 === 'object' ? pair.token1 : pair.Token1);
 
                 await prisma.mint.create({
                     txHash: tx.transactionHash,
@@ -49,8 +47,6 @@ async function handleMint(block, tx, mints) {
                     amount0: params[0],
                     amount1: params[1]
                 });
-
-                //console.log(`[${token0.symbol}/${token1.symbol}] Mint ${Helper.toEther(params[0])} ${token0.symbol} And ${Helper.toEther(params[1])} ${token1.symbol}`)
             }
         }
     }
@@ -60,13 +56,11 @@ async function handleBurn(block, tx, burns) {
     for (let burn of burns) {
         let unique = await prisma.burn.unique(tx.transactionHash, burn.logIndex);
         if(!unique) {
-            let pair = await pairComp.get(burn.address);
+            let pair = await component.pair.get(burn.address);
             if (pair) {
                 let sender = node.abi.decodeParameter('address', burn.topics[1]);
                 let to = node.abi.decodeParameter('address', burn.topics[2]);
                 let params = node.abi.decodeParameters(['uint256', 'uint256'], burn.data);
-                //let token0 = (typeof pair.token0 === 'object' ? pair.token0 : pair.Token0);
-                //let token1 = (typeof pair.token1 === 'object' ? pair.token1 : pair.Token1);
 
                 await prisma.burn.create({
                     txHash: tx.transactionHash,
@@ -77,8 +71,6 @@ async function handleBurn(block, tx, burns) {
                     amount1: params[1],
                     to: to
                 });
-
-                //console.log(`[${token0.symbol}/${token1.symbol}] Burn ${Helper.toEther(params[0])} ${token0.symbol} And ${Helper.toEther(params[1])} ${token1.symbol}`)
             }
         }
     }
@@ -88,7 +80,7 @@ async function handleSync(block, tx, syncs) {
     for (let sync of syncs) {
         let unique = await prisma.sync.unique(tx.transactionHash, sync.logIndex);
         if(!unique) {
-            let pair = await pairComp.get(sync.address);
+            let pair = await component.pair.get(sync.address);
             if (pair) {
                 let params = node.abi.decodeParameters(['uint112', 'uint112'], sync.data);
 
@@ -108,13 +100,11 @@ async function handleSwap(block, tx, swaps) {
     for (let swap of swaps) {
         let unique = await prisma.swap.unique(tx.transactionHash, swap.logIndex);
         if(!unique) {
-            let pair = await pairComp.get(swap.address);
+            let pair = await component.pair.get(swap.address);
             if (pair) {
                 let sender = node.abi.decodeParameter('address', swap.topics[1]);
                 let to = node.abi.decodeParameter('address', swap.topics[2]);
                 let params = node.abi.decodeParameters(['uint256', 'uint256', 'uint256', 'uint256'], swap.data);
-                //let token0 = (typeof pair.token0 === 'object' ? pair.token0 : pair.Token0);
-                //let token1 = (typeof pair.token1 === 'object' ? pair.token1 : pair.Token1);
 
                 await prisma.swap.create({
                     txHash: tx.transactionHash,
@@ -127,12 +117,6 @@ async function handleSwap(block, tx, swaps) {
                     amount1Out: params[3],
                     to: to
                 });
-
-                /*if (Helper.toEther(params[0]) > 0) {
-                    console.log(`[${token0.symbol}/${token1.symbol}] Swap ${Helper.toEther(params[0])} ${token0.symbol} to ${Helper.toEther(params[3])} ${token1.symbol}`)
-                } else if (Helper.toEther(params[1]) > 0) {
-                    console.log(`[${token0.symbol}/${token1.symbol}] Swap ${Helper.toEther(params[1])} ${token1.symbol} to ${Helper.toEther(params[2])} ${token0.symbol}`)
-                }*/
             }
         }
     }

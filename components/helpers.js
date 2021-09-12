@@ -27,7 +27,7 @@ exports.memoryUsage = function(limit) {
 }
 
 exports.toDate = function(timestamp) {
-    return new Date((timestamp * 1000));
+    return new Date(timestamp * 1000);
 };
 
 exports.toEther = function(val, type = 'ether') {

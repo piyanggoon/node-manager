@@ -12,7 +12,6 @@ const Reserves = require('../components/prisma/reserves.js');
 class Prisma {
     constructor() {
         this.prisma = new PrismaClient();
-
         this.block = new Block(this.prisma);
         this.transaction = new Transaction(this.prisma);
         this.token = new Token(this.prisma);

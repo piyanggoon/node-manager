@@ -5,8 +5,7 @@ const Config = require('../config.json');
 
 class Polling {
     constructor(interval = 1000) {
-        let file = fs.readFileSync('./polling.json');
-        this.polling = JSON.parse(file);
+        this.polling = JSON.parse(fs.readFileSync('./polling.json'));
         this.interval = interval;
     }
 
@@ -20,10 +19,10 @@ class Polling {
             }
             
             try {
-                let promises = [];
                 let blockLeft = (self.polling.lastBlock - self.polling.syncBlock);
                     blockLeft = (blockLeft > step ? step : blockLeft);
                 if (blockLeft >= 1) {
+                    let promises = [];
                     for (let i = 0; i < blockLeft; i++) {
                         promises.push(func(self.polling.syncBlock + i));
                     }
